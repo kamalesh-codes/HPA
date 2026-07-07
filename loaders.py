@@ -3,7 +3,8 @@ import torch
 import torchvision
 import numpy as np
 from omegaconf import Dictconfig
-from torch.utils.data import WeightedRandomSampler,DataLoader
+from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 
 class HPADataset(torch.uitls.Dataset):
 
@@ -43,7 +44,7 @@ class HPADataset(torch.uitls.Dataset):
             return img_data/255
         
 
-def _calculate_sample_weights(cfg:Dictconfig):
+def calculate_sample_weights(cfg:Dictconfig):
     
     df = pd.read_csv(cfg.data.train_files_path)
     class_count = np.zeros(cfg.data.num_class)
@@ -79,15 +80,28 @@ def get_train_loader(cfg:Dictconfig):
                                  transforms.v2.RandomAffine(scale=(0.9,1.1))])
 
     train_dataset = HPADataset(cfg,train=True,transforms=transforms)
-    class_weights,sample_weigths = _calculate_sample_weights(cfg)
-    train_sampler =  WeightedRandomSampler(sample_weigths,num_samples=len(train_dataset),replacement=True)
+
+    sampler = DistributedSampler(train_dataset)
 
     train_loader = DataLoader(dataset = train_dataset,
                                 batch_size = cfg.train.batch_size,
-                                shuffle = True,
-                                sampler = train_sampler,
+                                sampler=sampler,
                                 num_workers=cfg.train.num_workers,
                                 pin_memory=True,
                                 prefetch_factor=cfg.train.prefetch)
+    
+    return train_loader
+
+def get_test_loader(cfg:Dictconfig):
+
+    test_dataset = HPADataset(cfg,train=False)
+
+    test_loader = DataLoader(dataset=test_dataset,
+                             batch_size=cfg.test.batch_size,
+                             shuffle=False,
+                             num_workers=cfg.test.num_workers,
+                             pin_memory=True,
+                             prefetch_factor=cfg.test.prefetch)
+    return test_loader
 
 
