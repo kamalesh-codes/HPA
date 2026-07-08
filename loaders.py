@@ -2,13 +2,13 @@ import pandas as pd
 import torch
 import torchvision
 import numpy as np
-from omegaconf import Dictconfig
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 
 class HPADataset(torch.uitls.Dataset):
 
-    def __init__(self,cfg:Dictconfig,train:bool=True,transforms = None):
+    def __init__(self,cfg:DictConfig,train:bool=True,transforms = None):
         
         super().__init__()
 
@@ -44,7 +44,7 @@ class HPADataset(torch.uitls.Dataset):
             return img_data/255
         
 
-def calculate_sample_weights(cfg:Dictconfig):
+def calculate_sample_weights(cfg:DictConfig):
     
     df = pd.read_csv(cfg.data.train_files_path)
     class_count = np.zeros(cfg.data.num_class)
@@ -72,7 +72,7 @@ def calculate_sample_weights(cfg:Dictconfig):
     return class_weights,sample_weights
 
 
-def get_train_loader(cfg:Dictconfig):
+def get_train_loader(cfg:DictConfig):
 
     transforms = transforms.Compose([transforms.v2.RandomHorizontalFlip(p=0.5),
                                  transforms.v2.RandomVerticalFlip(p=0.5),
@@ -92,7 +92,7 @@ def get_train_loader(cfg:Dictconfig):
     
     return train_loader
 
-def get_test_loader(cfg:Dictconfig):
+def get_test_loader(cfg:DictConfig):
 
     test_dataset = HPADataset(cfg,train=False)
 

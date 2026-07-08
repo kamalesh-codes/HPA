@@ -42,7 +42,7 @@ train:
   lr: 0.001
   epochs: 10
   prefetch: 1
-  accumulation_step:4
+  accumulation_step: 4
 
 test:
   batch_size: 16

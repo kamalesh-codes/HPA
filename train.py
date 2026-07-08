@@ -44,35 +44,44 @@ def train_model(cfg: DictConfig, rank:int):
             f1_metric.reset()
 
         ddp_model.train()
-        epoch_running_loss = 0.0
+        global_running_loss = torch.tensor(0.0,device=device)
+        global_total_samples = torch.tesnor(0,device=device)
         optimizer.zero_grad(set_to_none=True)
         
         for batch_idx,(image,target) in enumerate(train_loader,start=1):
 
+            local_batch_loss = torch.tensor(0.0,device=device)
+            local_batch_samples = torch.tesnor(0,device=device)
             image,label = image.to(device,non_blocking=True),label.to(device,non_blocking=True)
 
             output = model(image)
             loss = criterion(output,target)
-            loss = loss/accumulation_step
-            loss.backward()
+            (loss/accumulation_step).backward()
 
 
             if (batch_idx%accumulation_step==0):
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
 
-            epoch_running_loss += loss.detach()
+            local_batch_loss += loss.detach()*image.Size(0)
+            local_batch_samples += image.Size(0)
+
+            dist.all_reduce(local_batch_loss,op=dist.ReduceOp.SUM)
+            dist.all_reduce(local_batch_samples,op=dist.ReduceOp.SUM)
+
+            global_running_loss += local_batch_loss
+            global_total_samples += local_batch_samples
 
             if dist.get_rank()==0:
                 f1_metric.update(output,target)
                 pbar.update(2)
-                pbar.set_postfix(loss = (epoch_running_loss/(batch_idx+1)).item())
+                pbar.set_postfix(loss = (global_running_loss/global_total_samples).item())
         
-        epoch_running_loss/=len(train_loader)
-        epoch_running_loss = epoch_running_loss.item()
-        macro_f1 = f1_metric.compute().item()
-        pbar.set_postfix(loss = (epoch_running_loss/(batch_idx+1)).item(),
+        if dist.get_rank()==0:
+            macro_f1 = f1_metric.compute().item()
+            pbar.set_postfix(loss = (global_running_loss/global_total_samples).item(),
                          macro_f1 = macro_f1)
+            pbar.close()
 
 
 

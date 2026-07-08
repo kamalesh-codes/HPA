@@ -3,6 +3,6 @@ from omegaconf import DictConfig
 
 @hydra.main(version_base=None,config_path="configs",config_name="config")
 def main(cfg:DictConfig):
-    print(cfg)
+    print(cfg.train.lr)
 
 main()
