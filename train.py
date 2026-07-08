@@ -17,7 +17,7 @@ def train_model(cfg: DictConfig, rank:int):
     
     #Model creation
     device = torch.device(type="cuda",index=rank)
-    model = get_model().to(device)
+    model = get_model(cfg).to(device)
     ddp_model = DDP(model,device_ids=[rank])
 
     #loss ,optimizer & metric definition
@@ -32,7 +32,7 @@ def train_model(cfg: DictConfig, rank:int):
                                 sync_on_compute=False)
         f1_metric = f1_metric.to(device)
     
-    train_loader = get_train_loader()
+    train_loader = get_train_loader(cfg)
 
     accumulation_step = cfg.train.accumulation_step
 
