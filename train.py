@@ -46,7 +46,7 @@ def train_model(cfg: DictConfig, rank:int):
 
         ddp_model.train()
         global_running_loss = torch.tensor(0.0,device=device)
-        global_total_samples = torch.tesnor(0,device=device)
+        global_total_samples = torch.tensor(0,device=device)
         optimizer.zero_grad(set_to_none=True)
         
         for batch_idx,(image,target) in enumerate(train_loader,start=1):
