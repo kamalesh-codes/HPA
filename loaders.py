@@ -1,7 +1,6 @@
 import pandas as pd
 import torch
 import torchvision
-from torchvision import transforms
 import numpy as np
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader,Dataset
@@ -75,10 +74,10 @@ def calculate_sample_weights(cfg:DictConfig):
 
 def get_train_loader(cfg:DictConfig):
 
-    transforms = transforms.Compose([transforms.v2.RandomHorizontalFlip(p=0.5),
-                                 transforms.v2.RandomVerticalFlip(p=0.5),
-                                 transforms.v2.RandomRotation(180),
-                                 transforms.v2.RandomAffine(scale=(0.9,1.1))])
+    transforms = torchvision.transforms.Compose([torchvision.transforms.v2.RandomHorizontalFlip(p=0.5),
+                                 torchvision.transforms.v2.RandomVerticalFlip(p=0.5),
+                                 torchvision.transforms.v2.RandomRotation(180),
+                                 torchvision.transforms.v2.RandomAffine(scale=(0.9,1.1))])
 
     train_dataset = HPADataset(cfg,train=True,transforms=transforms)
 
