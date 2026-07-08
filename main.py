@@ -6,5 +6,3 @@ def main(cfg:DictConfig):
     print(cfg)
 
 main()
-
-

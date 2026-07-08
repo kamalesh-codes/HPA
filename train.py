@@ -1,5 +1,6 @@
 import os
 import torch
+from tqdm import tqdm
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torchmetrics.classification import MultilabelF1Score
@@ -27,7 +28,8 @@ def train_model(cfg: DictConfig, rank:int):
     if dist.get_rank()==0:
         f1_metric = MultilabelF1Score(num_labels=cfg.data.num_class,
                                 average="macro",
-                                multidim_average="global")
+                                multidim_average="global",
+                                sync_on_compute=False)
         f1_metric = f1_metric.to(device)
     
     train_loader = get_train_loader()
@@ -37,7 +39,10 @@ def train_model(cfg: DictConfig, rank:int):
     for epoch in range(1,cfg.train.epochs+1):
 
         if dist.get_rank()==0:
+            pbar = tqdm(total = len(train_loader)*2,unit="batch")
+            pbar.set_description(f"Epoch [{epoch}/{cfg.train.epochs}]")
             f1_metric.reset()
+
         ddp_model.train()
         epoch_running_loss = 0.0
         optimizer.zero_grad(set_to_none=True)
@@ -51,22 +56,23 @@ def train_model(cfg: DictConfig, rank:int):
             loss = loss/accumulation_step
             loss.backward()
 
-            if dist.get_rank()==0:
-                f1_metric.update(output,target)
 
             if (batch_idx%accumulation_step==0):
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
 
-            epoch_running_loss += torch.abs_(loss.detach())
+            epoch_running_loss += loss.detach()
+
+            if dist.get_rank()==0:
+                f1_metric.update(output,target)
+                pbar.update(2)
+                pbar.set_postfix(loss = (epoch_running_loss/(batch_idx+1)).item())
         
         epoch_running_loss/=len(train_loader)
         epoch_running_loss = epoch_running_loss.item()
         macro_f1 = f1_metric.compute().item()
-
-    print(f"Epoch [{epoch}/{cfg.train.epochs}] |"
-            f"Train Loss: {epoch_running_loss:.5f}  Macro F1: {macro_f1:.5f}")
-
+        pbar.set_postfix(loss = (epoch_running_loss/(batch_idx+1)).item(),
+                         macro_f1 = macro_f1)
 
 
 
