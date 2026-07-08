@@ -17,7 +17,7 @@ class HPADataset(Dataset):
 
         self.train = train
         self.transform = transforms
-        self.df = pd.read_csv(cfg.data.train_files_path if self.train else cfg.data.test_files_path).iloc[:100]
+        self.df = pd.read_csv(cfg.data.train_files_path if self.train else cfg.data.test_files_path)
         self.data_path = cfg.data.train_data_path if self.train else cfg.data.test_data_path
         self.num_class = cfg.data.num_class
     
