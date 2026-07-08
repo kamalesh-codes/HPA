@@ -90,7 +90,7 @@ def main(cfg:DictConfig):
 
     dist.init_process_group(backend="nccl")
 
-    local_rank = int(os.environ("LOCAL_RANK"))
+    local_rank = int(os.environ["LOCAL_RANK"])
     torch.cuda.set_device(local_rank)
 
     train_model(cfg,local_rank)
