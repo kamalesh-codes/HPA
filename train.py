@@ -52,7 +52,7 @@ def train_model(cfg: DictConfig, rank:int):
         for batch_idx,(image,target) in enumerate(train_loader,start=1):
 
             local_batch_loss = torch.tensor(0.0,device=device)
-            local_batch_samples = torch.tesnor(0,device=device)
+            local_batch_samples = torch.tensor(0,device=device)
             image,label = image.to(device,non_blocking=True),label.to(device,non_blocking=True)
 
             output = model(image)
