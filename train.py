@@ -92,7 +92,7 @@ def main(cfg:DictConfig):
 
     torch.cuda.set_device(local_rank)
 
-    train_model(cfg,local_rank)
+    train_model(cfg,device)
 
     dist.destroy_process_group()
 
