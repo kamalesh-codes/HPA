@@ -13,12 +13,11 @@ from omegaconf import DictConfig
 
 
 
-def train_model(cfg: DictConfig, rank:int):
+def train_model(cfg: DictConfig, device:torch.device):
     
     #Model creation
-    device = torch.device(type="cuda",index=rank)
     model = get_model(cfg).to(device)
-    ddp_model = DDP(model,device_ids=[rank])
+    ddp_model = DDP(model,device_ids=[device.index])
 
     #loss ,optimizer & metric definition
     criterion = torch.nn.BCEWithLogitsLoss(reduction="mean")
@@ -87,9 +86,10 @@ def train_model(cfg: DictConfig, rank:int):
 @hydra.main(version_base=None,config_path="configs",config_name="config")
 def main(cfg:DictConfig):
 
-    dist.init_process_group(backend="nccl")
-
     local_rank = int(os.environ["LOCAL_RANK"])
+    device = torch.device(type="cuda",index=local_rank)
+    dist.init_process_group(backend="nccl",device_id=device)
+
     torch.cuda.set_device(local_rank)
 
     train_model(cfg,local_rank)
