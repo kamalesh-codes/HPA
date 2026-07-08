@@ -6,7 +6,7 @@ from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 
-class HPADataset(torch.uitls.Dataset):
+class HPADataset(torch.uitls.data.Dataset):
 
     def __init__(self,cfg:DictConfig,train:bool=True,transforms = None):
         
