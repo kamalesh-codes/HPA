@@ -52,7 +52,7 @@ def train_model(cfg: DictConfig, device:torch.device):
             local_batch_samples = torch.tensor(0,device=device)
             image,target = image.to(device,non_blocking=True),target.to(device,non_blocking=True).to(torch.float32)
 
-            output = model(image)
+            output = ddp_model(image)
             loss = criterion(output,target)
             (loss/accumulation_step).backward()
 
