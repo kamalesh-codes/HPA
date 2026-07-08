@@ -1,6 +1,7 @@
 import pandas as pd
 import torch
 import torchvision
+from torchvision import transforms
 import numpy as np
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader,Dataset
