@@ -77,10 +77,14 @@ def train_model(cfg: DictConfig, device:torch.device):
         
         macro_f1 = f1_metric.compute().item()
         if dist.get_rank()==0:
-            pbar.set_postfix(loss = (global_running_loss/global_total_samples).item(),
-                         macro_f1 = macro_f1)
+            print(macro_f1)
+            pbar.set_postfix(macro_f1 = macro_f1,
+                             loss = (global_running_loss/global_total_samples).item())
             pbar.close()
 
+    # if dist.get_rank()==0:
+
+    #     torch.save(ddp_model.state_dict(),cfg.train.model_save_path+"model.pth")
 
 
 @hydra.main(version_base=None,config_path="configs",config_name="config")
