@@ -38,6 +38,7 @@ def train_model(cfg: DictConfig, rank:int):
 
     for epoch in range(1,cfg.train.epochs+1):
 
+        train_loader.sampler.set_epoch(epoch)
         if dist.get_rank()==0:
             pbar = tqdm(total = len(train_loader)*2,unit="batch")
             pbar.set_description(f"Epoch [{epoch}/{cfg.train.epochs}]")

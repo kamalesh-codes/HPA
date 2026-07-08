@@ -1,9 +1,9 @@
 
 data:
-  train_data_path: /home/mypop/Data/human-protein-atlas-image-classification/train
-  test_data_path: /home/mypop/Data/human-protein-atlas-image-classification/test
-  train_files_path: /home/mypop/Data/human-protein-atlas-image-classification/train.csv
-  test_files_path: /home/mypop/Data/human-protein-atlas-image-classification/sample_submission.csv
+  train_data_path: /home/iris/Data/human-protein-atlas-image-classification/train
+  test_data_path: /home/iris/Data/human-protein-atlas-image-classification/test
+  train_files_path: /home/iris/Data/human-protein-atlas-image-classification/train.csv
+  test_files_path: /home/iris/Data/human-protein-atlas-image-classification/sample_submission.csv
   num_class: 28
   label_map:
     0: Nucleoplasm
