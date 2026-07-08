@@ -53,7 +53,7 @@ def train_model(cfg: DictConfig, rank:int):
 
             local_batch_loss = torch.tensor(0.0,device=device)
             local_batch_samples = torch.tensor(0,device=device)
-            image,label = image.to(device,non_blocking=True),target.to(device,non_blocking=True)
+            image,target = image.to(device,non_blocking=True),target.to(device,non_blocking=True)
 
             output = model(image)
             loss = criterion(output,target)
