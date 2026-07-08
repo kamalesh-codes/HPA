@@ -75,11 +75,11 @@ def train_model(cfg: DictConfig, device:torch.device):
                 pbar.update(2)
                 pbar.set_postfix(loss = (global_running_loss/global_total_samples).item())
         
-        macro_f1 = f1_metric.compute().item()
+        f1 = f1_metric.compute().item()
         if dist.get_rank()==0:
-            print(macro_f1)
-            pbar.set_postfix(macro_f1 = macro_f1,
-                             loss = (global_running_loss/global_total_samples).item())
+            print(f1)
+            pbar.set_postfix(macro_f1 = f1,
+                             n_loss = (global_running_loss/global_total_samples).item())
             pbar.close()
 
     # if dist.get_rank()==0:
