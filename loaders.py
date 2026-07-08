@@ -3,10 +3,10 @@ import torch
 import torchvision
 import numpy as np
 from omegaconf import DictConfig
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader,Dataset
 from torch.utils.data.distributed import DistributedSampler
 
-class HPADataset(torch.uitls.data.Dataset):
+class HPADataset(Dataset):
 
     def __init__(self,cfg:DictConfig,train:bool=True,transforms = None):
         
