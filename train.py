@@ -25,12 +25,10 @@ def train_model(cfg: DictConfig, rank:int):
     optimizer = torch.optim.Adam(ddp_model.parameters(),
                                 lr=cfg.train.lr,
                                 weight_decay=1e-4)
-    if dist.get_rank()==0:
-        f1_metric = MultilabelF1Score(num_labels=cfg.data.num_class,
+    f1_metric = MultilabelF1Score(num_labels=cfg.data.num_class,
                                 average="macro",
-                                multidim_average="global",
-                                sync_on_compute=False)
-        f1_metric = f1_metric.to(device)
+                                multidim_average="global")
+    f1_metric = f1_metric.to(device)
     
     train_loader = get_train_loader(cfg)
 
@@ -39,10 +37,10 @@ def train_model(cfg: DictConfig, rank:int):
     for epoch in range(1,cfg.train.epochs+1):
 
         train_loader.sampler.set_epoch(epoch)
+        f1_metric.reset()
         if dist.get_rank()==0:
             pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch")
             pbar.set_description(f"Epoch [{epoch}/{cfg.train.epochs}]")
-            f1_metric.reset()
 
         ddp_model.train()
         global_running_loss = torch.tensor(0.0,device=device)
@@ -59,6 +57,7 @@ def train_model(cfg: DictConfig, rank:int):
             loss = criterion(output,target)
             (loss/accumulation_step).backward()
 
+            f1_metric.update(output,target)
 
             if (batch_idx%accumulation_step==0):
                 optimizer.step()
@@ -74,12 +73,11 @@ def train_model(cfg: DictConfig, rank:int):
             global_total_samples += local_batch_samples
 
             if dist.get_rank()==0:
-                f1_metric.update(output,target)
                 pbar.update(2)
                 pbar.set_postfix(loss = (global_running_loss/global_total_samples).item())
         
+        macro_f1 = f1_metric.compute().item()
         if dist.get_rank()==0:
-            macro_f1 = f1_metric.compute().item()
             pbar.set_postfix(loss = (global_running_loss/global_total_samples).item(),
                          macro_f1 = macro_f1)
             pbar.close()
