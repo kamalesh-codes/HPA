@@ -85,7 +85,7 @@ def train_model(cfg: DictConfig, rank:int):
 
 
 
-@hydra.main(version_base=None,config_path="configs",cofig_name="config")
+@hydra.main(version_base=None,config_path="configs",config_name="config")
 def main(cfg:DictConfig):
 
     dist.init_process_group(backend="nccl")
