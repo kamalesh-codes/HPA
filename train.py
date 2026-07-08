@@ -64,8 +64,8 @@ def train_model(cfg: DictConfig, rank:int):
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
 
-            local_batch_loss += loss.detach()*image.Size(0)
-            local_batch_samples += image.Size(0)
+            local_batch_loss += loss.detach()*image.size(0)
+            local_batch_samples += image.size(0)
 
             dist.all_reduce(local_batch_loss,op=dist.ReduceOp.SUM)
             dist.all_reduce(local_batch_samples,op=dist.ReduceOp.SUM)
