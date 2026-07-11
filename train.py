@@ -84,7 +84,7 @@ def train_model(cfg: DictConfig, device:torch.device):
 
     if dist.get_rank()==0:
         now = datetime.now()
-        dt = now.strftime("%d//%m-%H:%M")
+        dt = now.strftime("%d-%m-%H:%M")
         print(dt)
         torch.save(ddp_model.state_dict(),f"model-epoch:{cfg.train.epochs}-{dt}.pth")
 
