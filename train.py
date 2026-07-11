@@ -38,7 +38,7 @@ def train_model(cfg: DictConfig, device:torch.device):
         train_loader.sampler.set_epoch(epoch)
         f1_metric.reset()
         if dist.get_rank()==0:
-            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch",ncols=150)
+            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch",ncols=100)
             pbar.set_description(f"Epoch [{epoch}/{cfg.train.epochs}]")
 
         ddp_model.train()
@@ -73,12 +73,11 @@ def train_model(cfg: DictConfig, device:torch.device):
 
             if dist.get_rank()==0:
                 pbar.update(2)
-                pbar.set_postfix(loss = (global_running_loss/global_total_samples).item())
+                pbar.set_postfix_str(f"loss:{(global_running_loss/global_total_samples).item():.4f}")
         
         f1 = f1_metric.compute().item()
         if dist.get_rank()==0:
-            pbar.set_postfix(macro_f1 = f1,
-                             n_loss = (global_running_loss/global_total_samples).item())
+            pbar.set_postfix_str(f"macro-f1:{f1:.4f} loss:{(global_running_loss/global_total_samples).item():.4f}")
             pbar.close()
 
     # if dist.get_rank()==0:
