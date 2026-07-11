@@ -1,6 +1,6 @@
 import os
 import torch
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torchmetrics.classification import MultilabelF1Score
@@ -77,7 +77,6 @@ def train_model(cfg: DictConfig, device:torch.device):
         
         f1 = f1_metric.compute().item()
         if dist.get_rank()==0:
-            print(f1)
             pbar.set_postfix(macro_f1 = f1,
                              n_loss = (global_running_loss/global_total_samples).item())
             pbar.close()
