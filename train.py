@@ -85,7 +85,7 @@ def train_model(cfg: DictConfig, device:torch.device):
     if dist.get_rank()==0:
         now = datetime.now()
         dt = now.strftime("%d/%m-%H:%M")
-        torch.save(ddp_model.state_dict(),cfg.train.model_save_path+f"model-epoch:{cfg.train.epochs}-{dt}.pt")
+        torch.save(ddp_model.state_dict(),f"model-epoch:{cfg.train.epochs}-{dt}.pth")
 
 
 @hydra.main(version_base=None,config_path="configs",config_name="config")
