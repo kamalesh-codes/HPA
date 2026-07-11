@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 import torch
 from tqdm import tqdm
 import torch.distributed as dist
@@ -38,7 +39,7 @@ def train_model(cfg: DictConfig, device:torch.device):
         train_loader.sampler.set_epoch(epoch)
         f1_metric.reset()
         if dist.get_rank()==0:
-            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch",ncols=100)
+            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch")
             pbar.set_description(f"Epoch [{epoch}/{cfg.train.epochs}]")
 
         ddp_model.train()
@@ -74,15 +75,17 @@ def train_model(cfg: DictConfig, device:torch.device):
             if dist.get_rank()==0:
                 pbar.update(2)
                 pbar.set_postfix_str(f"loss:{(global_running_loss/global_total_samples).item():.4f}")
+            break
         
         f1 = f1_metric.compute().item()
         if dist.get_rank()==0:
             pbar.set_postfix_str(f"macro-f1:{f1:.4f} loss:{(global_running_loss/global_total_samples).item():.4f}")
             pbar.close()
 
-    # if dist.get_rank()==0:
-
-    #     torch.save(ddp_model.state_dict(),cfg.train.model_save_path+"model.pth")
+    if dist.get_rank()==0:
+        now = datetime.now()
+        dt = dt.strftime("%d/%m-%H:%M")
+        torch.save(ddp_model.state_dict(),cfg.train.model_save_path+f"model-epoch:{cfg.train.epochs}-{dt}.pth")
 
 
 @hydra.main(version_base=None,config_path="configs",config_name="config")
