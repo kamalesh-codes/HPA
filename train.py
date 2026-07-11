@@ -1,6 +1,6 @@
 import os
 import torch
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torchmetrics.classification import MultilabelF1Score
@@ -38,7 +38,7 @@ def train_model(cfg: DictConfig, device:torch.device):
         train_loader.sampler.set_epoch(epoch)
         f1_metric.reset()
         if dist.get_rank()==0:
-            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch")
+            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch",ncols=150)
             pbar.set_description(f"Epoch [{epoch}/{cfg.train.epochs}]")
 
         ddp_model.train()
