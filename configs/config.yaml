@@ -43,7 +43,7 @@ train:
   epochs: 10
   prefetch: 1
   accumulation_step: 4
-  model_save_path: './'
+  model_save_path: ''
 
 test:
   batch_size: 16
