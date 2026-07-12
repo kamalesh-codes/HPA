@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 import torch
 from tqdm import tqdm
+from torchvision.ops import sigmoid_focal_loss
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torchmetrics.classification import MultilabelF1Score
@@ -20,8 +21,7 @@ def train_model(cfg: DictConfig, device:torch.device):
     model = get_model(cfg).to(device)
     ddp_model = DDP(model,device_ids=[device.index])
 
-    #loss ,optimizer & metric definition
-    criterion = torch.nn.BCEWithLogitsLoss(reduction="mean")
+    #optimizer & metric definition
     optimizer = torch.optim.Adam(ddp_model.parameters(),
                                 lr=cfg.train.lr,
                                 weight_decay=1e-4)
@@ -39,7 +39,7 @@ def train_model(cfg: DictConfig, device:torch.device):
         train_loader.sampler.set_epoch(epoch)
         f1_metric.reset()
         if dist.get_rank()==0:
-            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch")
+            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch",ncols=100)
             pbar.set_description(f"Epoch [{epoch}/{cfg.train.epochs}]")
 
         ddp_model.train()
@@ -54,7 +54,10 @@ def train_model(cfg: DictConfig, device:torch.device):
             image,target = image.to(device,non_blocking=True),target.to(device,non_blocking=True).to(torch.float32)
 
             output = ddp_model(image)
-            loss = criterion(output,target)
+            loss = sigmoid_focal_loss(output,target,
+                                      alpha=cfg.train.alpha,
+                                      gamma=cfg.train.alpha,
+                                      reduction="mean")
             (loss/accumulation_step).backward()
 
             f1_metric.update(output,target)

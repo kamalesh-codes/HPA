@@ -43,6 +43,9 @@ train:
   epochs: 10
   prefetch: 1
   accumulation_step: 4
+  alpha: -1
+  gamma: 4
+  model_path: "\\HPA\\checkpoints\"
 
 test:
   batch_size: 16
