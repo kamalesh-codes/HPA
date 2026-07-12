@@ -39,12 +39,12 @@ data:
 train:
   batch_size: 16
   num_workers: 2
-  lr: 0.001
+  lr: 0.0001
   epochs: 10
   prefetch: 1
   accumulation_step: 4
   alpha: -1
-  gamma: 2
+  gamma: 4
   model_path: ""
 
 test:
