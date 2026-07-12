@@ -7,7 +7,6 @@ main.py
 .vscode/
 *.ipynb
 outputs/
-checkpoints/
 
 # C extensions
 *.so
