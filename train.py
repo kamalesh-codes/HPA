@@ -39,7 +39,7 @@ def train_model(cfg: DictConfig, device:torch.device):
         train_loader.sampler.set_epoch(epoch)
         f1_metric.reset()
         if dist.get_rank()==0:
-            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch",ncols=100)
+            pbar = tqdm(total = len(train_loader)*torch.cuda.device_count(),unit="batch",ncols=70)
             pbar.set_description(f"Epoch [{epoch}/{cfg.train.epochs}]")
 
         ddp_model.train()
