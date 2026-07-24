@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 import torch
+import wandb
 from tqdm import tqdm
 from torchvision.ops import sigmoid_focal_loss
 import torch.distributed as dist
@@ -33,6 +34,11 @@ def train_model(cfg: DictConfig, device:torch.device):
     train_loader = get_train_loader(cfg)
 
     accumulation_step = cfg.train.accumulation_step
+
+    if dist.get_rank()==0:
+        wandb.init(project="HPAIC",
+                   name="densenet121",
+                   config=cfg.train)
 
     for epoch in range(1,cfg.train.epochs+1):
 
@@ -76,12 +82,20 @@ def train_model(cfg: DictConfig, device:torch.device):
             global_total_samples += local_batch_samples
 
             if dist.get_rank()==0:
+                wandb.log({
+                    "train/epoch-{epochs}-rl":(global_running_loss/global_total_samples).item()
+                })
                 pbar.update(2)
                 pbar.set_postfix_str(f"loss:{(global_running_loss/global_total_samples).item():.4f}")
 
         f1 = f1_metric.compute().item()
+        global_loss = global_running_loss/global_total_samples
         if dist.get_rank()==0:
-            pbar.set_postfix_str(f"macro-f1:{f1:.4f} loss:{(global_running_loss/global_total_samples).item():.4f}")
+            wandb.log({
+                "train/epoch-loss":global_loss.item(),
+                "train/macro-f1":f1
+            })
+            pbar.set_postfix_str(f"macro-f1:{f1:.4f} loss:{global_loss.item():.4f}")
             pbar.close()
         
 
