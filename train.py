@@ -66,18 +66,18 @@ def train_model(cfg: DictConfig, device:torch.device):
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
 
-            # local_batch_loss += loss.detach()*image.size(0)
-            # local_batch_samples += image.size(0)
+            local_batch_loss += loss.detach()*image.size(0)
+            local_batch_samples += image.size(0)
 
-            # dist.all_reduce(local_batch_loss,op=dist.ReduceOp.SUM)
-            # dist.all_reduce(local_batch_samples,op=dist.ReduceOp.SUM)
+            dist.all_reduce(local_batch_loss,op=dist.ReduceOp.SUM)
+            dist.all_reduce(local_batch_samples,op=dist.ReduceOp.SUM)
 
-            # global_running_loss += local_batch_loss
-            # global_total_samples += local_batch_samples
+            global_running_loss += local_batch_loss
+            global_total_samples += local_batch_samples
 
             if dist.get_rank()==0:
                 pbar.update(2)
-                # pbar.set_postfix_str(f"loss:{(global_running_loss/global_total_samples).item():.4f}")
+                pbar.set_postfix_str(f"loss:{(global_running_loss/global_total_samples).item():.4f}")
 
         f1 = f1_metric.compute().item()
         if dist.get_rank()==0:
