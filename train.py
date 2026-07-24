@@ -82,9 +82,6 @@ def train_model(cfg: DictConfig, device:torch.device):
             global_total_samples += local_batch_samples
 
             if dist.get_rank()==0:
-                wandb.log({
-                    f"train/epoch-{epoch}-runloss":(global_running_loss/global_total_samples).item()
-                })
                 pbar.update(2)
                 pbar.set_postfix_str(f"loss:{(global_running_loss/global_total_samples).item():.4f}")
 
@@ -92,8 +89,8 @@ def train_model(cfg: DictConfig, device:torch.device):
         global_loss = global_running_loss/global_total_samples
         if dist.get_rank()==0:
             wandb.log({
-                f"train/epoch-{epoch}-loss":global_loss.item(),
-                f"train/epoch-{epoch}-macro-f1":f1
+                f"train/loss":global_loss.item(),
+                f"train/macro-f1":f1
             })
             pbar.set_postfix_str(f"macro-f1:{f1:.4f} loss:{global_loss.item():.4f}")
             pbar.close()
