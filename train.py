@@ -19,7 +19,6 @@ def train_model(cfg: DictConfig, device:torch.device):
 
     obj = load_checkpoint(cfg)
 
-
     #Model creation
     model = get_model(cfg).to(device)
 

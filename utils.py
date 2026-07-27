@@ -16,8 +16,8 @@ def cleanup():
 
 def checkpoint(cfg,obj):
 
-    project_root = os.getcwd()
-    with tempfile.NamedTemporaryFile() as tmp:
+    project_root = os.path.dirname(os.path.abspath("checkpoint.pth"))
+    with tempfile.NamedTemporaryFile(dir=project_root) as tmp:
         torch.save(obj,tmp.name)
         os.replace(tmp.name,"checkpoint.pth")
 
