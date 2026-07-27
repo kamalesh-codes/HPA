@@ -17,10 +17,16 @@ from omegaconf import DictConfig
 
 def train_model(cfg: DictConfig, device:torch.device):
 
+    obj = load_checkpoint()
 
 
     #Model creation
     model = get_model(cfg).to(device)
+
+    if cfg.train.run_from_checkpoint :
+        model.load_state_dict(obj["model"])
+
+    ddp_model = DDP(model,device_ids=[device.index])
 
     #optimizer & metric definition
     optimizer = torch.optim.Adam(ddp_model.parameters(),
@@ -29,12 +35,11 @@ def train_model(cfg: DictConfig, device:torch.device):
     metric = MultilabelF1Score(num_labels=cfg.data.num_class,
                                 average="macro",
                                 multidim_average="global")
+    metric = metric.to(device)
 
     starting_epoch = 1
 
-    if cfg.train.run_from_checkpoint:
-        obj = load_checkpoint()
-        model.load_state_dict(obj["model"])
+    if cfg.train.run_from_checkpoint :
         optimizer.load_state_dict(obj["optimizer"])
         starting_epoch = obj["epoch"]+1
 
@@ -51,8 +56,6 @@ def train_model(cfg: DictConfig, device:torch.device):
                             name=cfg.train.run_name,
                             resume="never")
             
-    metric = metric.to(device)
-    ddp_model = DDP(model,device_ids=[device.index])
     train_loader = get_train_loader(cfg)
 
     accumulation_step = cfg.train.accumulation_step
