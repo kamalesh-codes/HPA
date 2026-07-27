@@ -1,11 +1,12 @@
-import hydra
-from omegaconf import DictConfig
-from loaders import get_train_loader
+import wandb
+import torch
 
-@hydra.main(version_base=None,config_path="configs",config_name="config")
-def main(cfg:DictConfig):
+run = wandb.init(project="demo-check",name="new-run",id="new_run",resume="allow")
+print(run.id,run.name)
 
-    loader = get_train_loader(cfg)
-    print(next(iter(loader)).shape)
+for i in range(10):
+    wandb.log({
+        "loss":torch.rand(1).item()
+    })
 
-main()
+wandb.finish()

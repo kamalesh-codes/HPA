@@ -1,0 +1,30 @@
+_wandb:
+    value:
+        cli_version: 0.28.1
+        e:
+            ir157qsohs4szgieseoiq8upz49lzadg:
+                codePath: main.py
+                codePathLocal: main.py
+                email: kamalesh.codes@gmail.com
+                executable: /home/iris/.pyenv/versions/3.12.2/bin/python
+                git:
+                    commit: 73c5cc6bd8a526fa6f7c1944ddbd9aa5b18fe241
+                    remote: git@github.com:kamalesh-codes/HPA.git
+                host: pop-os
+                os: Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39
+                program: /home/iris/Desktop/kaggle/HPA/main.py
+                python: CPython 3.12.2
+                root: /home/iris/Desktop/kaggle/HPA
+                startedAt: "2026-07-27T09:03:43.822196Z"
+                writerId: ir157qsohs4szgieseoiq8upz49lzadg
+        m: []
+        python_version: 3.12.2
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "4": 3.12.2
+            "5": 0.28.1
+            "12": 0.28.1
+            "13": linux-x86_64
