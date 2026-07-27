@@ -24,7 +24,7 @@ def train_model(cfg: DictConfig, device:torch.device):
 
     if cfg.train.run_from_checkpoint :
         print("Resuming from checkpoint..")
-        model.load_state_dict(obj["modle"])
+        model.load_state_dict(obj["model"])
         print("Loaded the model")
 
     ddp_model = DDP(model,device_ids=[device.index])
