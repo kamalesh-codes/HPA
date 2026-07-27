@@ -24,7 +24,7 @@ def checkpoint(cfg,obj):
 def load_checkpoint(cfg):
 
     if os.path.exists("checkpoint.pth"):
-        obj = torch.load("checkpoint.pth",map_location="cpu")
+        obj = torch.load("checkpoint.pth",map_location="cpu",weights_only=False)
         return obj
     else:
          return False
