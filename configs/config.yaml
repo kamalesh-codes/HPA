@@ -45,7 +45,7 @@ train:
   accumulation_step: 4
   alpha: -1
   gamma: 4
-  run_from_checkpont: false
+  run_from_checkpoint: false
   run_name: ""
   model: ""
 
