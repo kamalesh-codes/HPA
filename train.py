@@ -23,7 +23,9 @@ def train_model(cfg: DictConfig, device:torch.device):
     model = get_model(cfg).to(device)
 
     if cfg.train.run_from_checkpoint :
-        model.load_state_dict(obj["model"])
+        print("Resuming from checkpoint..")
+        model.load_state_dict(obj["modle"])
+        print("Loaded the model")
 
     ddp_model = DDP(model,device_ids=[device.index])
 
@@ -41,6 +43,7 @@ def train_model(cfg: DictConfig, device:torch.device):
     if cfg.train.run_from_checkpoint :
         optimizer.load_state_dict(obj["optimizer"])
         starting_epoch = obj["epoch"]+1
+        print("Loaded the optimizer")
 
 
     if is_main():
