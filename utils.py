@@ -27,7 +27,7 @@ def load_checkpoint(cfg):
         obj = torch.load("checkpoint.pth",map_location="cpu",weights_only=False)
         return obj
     else:
-         return False
+        return False
 
 def is_main():
     return torch.distributed.get_rank()==0

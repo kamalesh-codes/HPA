@@ -19,10 +19,12 @@ def train_model(cfg: DictConfig, device:torch.device):
 
     obj = load_checkpoint(cfg)
 
+    if obj==False and cfg.train.run_from_checkpoint:
+        raise Exception("There is no checkpoint saved")
     #Model creation
     model = get_model(cfg).to(device)
 
-    if cfg.train.run_from_checkpoint and obj:
+    if cfg.train.run_from_checkpoint:
         print("Resuming from checkpoint..")
         model.load_state_dict(obj["model"])
         print("Loaded the model")
