@@ -47,6 +47,7 @@ train:
   gamma: 4
   run_from_checkpont: false
   run_name: ""
+  model: ""
 
 test:
   batch_size: 16
