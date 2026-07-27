@@ -14,7 +14,7 @@ def cleanup():
         torch.distributed.destroy_process_group()
 
 
-def checkpoint(cfg,obj):
+def checkpoint(obj):
 
     project_root = os.path.dirname(os.path.abspath("checkpoint.pth"))
     with tempfile.NamedTemporaryFile(dir=project_root) as tmp:

@@ -127,7 +127,7 @@ def train_model(cfg: DictConfig, device:torch.device):
                 "loss":global_loss,
                 "run_id":run.id}
         
-            checkpoint(obj,cfg)
+            checkpoint(obj)
 
     if is_main():
         wandb.finish()
