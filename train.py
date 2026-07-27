@@ -17,7 +17,7 @@ from omegaconf import DictConfig
 
 def train_model(cfg: DictConfig, device:torch.device):
 
-    obj = load_checkpoint()
+    obj = load_checkpoint(cfg)
 
 
     #Model creation
