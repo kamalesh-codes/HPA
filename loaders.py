@@ -1,4 +1,5 @@
 import pandas as pd
+from sympy import per
 import torch
 import torchvision
 from torchvision import transforms
@@ -91,7 +92,8 @@ def get_train_loader(cfg:DictConfig):
                                 sampler=sampler,
                                 num_workers=cfg.train.num_workers,
                                 pin_memory=True,
-                                prefetch_factor=cfg.train.prefetch)
+                                prefetch_factor=cfg.train.prefetch,
+                                persistent_workers=cfg.train.persistent)
     
     return train_loader
 
@@ -104,5 +106,6 @@ def get_test_loader(cfg:DictConfig):
                              shuffle=False,
                              num_workers=cfg.test.num_workers,
                              pin_memory=True,
-                             prefetch_factor=cfg.test.prefetch)
+                             prefetch_factor=cfg.test.prefetch,
+                             persistent_workers=cfg.train.persistent)
     return test_loader
