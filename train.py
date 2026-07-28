@@ -19,12 +19,12 @@ def train_model(cfg: DictConfig, device:torch.device):
 
     obj = load_checkpoint(cfg)
 
-    if obj==False and cfg.train.run_from_checkpoint:
+    if obj==False and cfg.train.run_from_checkpoint and is_main():
         raise Exception("There is no checkpoint saved")
     #Model creation
     model = get_model(cfg).to(device)
 
-    if cfg.train.run_from_checkpoint:
+    if cfg.train.run_from_checkpoint and is_main():
         print("Resuming from checkpoint..")
         model.load_state_dict(obj["model"])
         print("Loaded the model")
@@ -42,14 +42,13 @@ def train_model(cfg: DictConfig, device:torch.device):
 
     starting_epoch = 1
 
-    if cfg.train.run_from_checkpoint and obj:
+    if cfg.train.run_from_checkpoint:
         optimizer.load_state_dict(obj["optimizer"])
         starting_epoch = obj["epoch"]+1
-        print("Loaded the optimizer")
 
 
     if is_main():
-        if cfg.train.run_from_checkpoint and obj:
+        if cfg.train.run_from_checkpoint:
             run = wandb.init(project="HPAIC",
                             config=cfg.train,
                             id=obj["run_id"],
