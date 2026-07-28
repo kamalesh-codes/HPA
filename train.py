@@ -12,6 +12,7 @@ from utils import load_checkpoint, setup,cleanup,checkpoint,is_main
 
 import hydra
 from omegaconf import DictConfig
+from collections import OrderedDict
 
 
 
@@ -21,12 +22,18 @@ def train_model(cfg: DictConfig, device:torch.device):
 
     if obj==False and cfg.train.run_from_checkpoint and is_main():
         raise Exception("There is no checkpoint saved")
+    
     #Model creation
     model = get_model(cfg).to(device)
 
     if cfg.train.run_from_checkpoint and is_main():
         print("Resuming from checkpoint..")
-        model.load_state_dict(obj["model"])
+        old_state_dict = obj["model"]
+        new_state_dict = OrderedDict()
+        for k,v in old_state_dict.items():
+            k = k.replace("module.","")
+            new_state_dict[k]=v
+        model.load_state_dict(new_state_dict)
         print("Loaded the model")
 
     ddp_model = DDP(model,device_ids=[device.index])
