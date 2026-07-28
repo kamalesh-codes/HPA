@@ -80,16 +80,14 @@ def train_model(cfg: DictConfig, device:torch.device):
         metric.reset()
         ddp_model.train()
         optimizer.zero_grad(set_to_none=True)
-
-        global_running_loss = torch.tensor(0.0,device=device)
-        global_total_samples = torch.tensor(0,device=device)
         
+        local_loss = torch.tensor(0.0,device=device)
+        local_samples = torch.tensor(0,device=device)
+
         for batch_idx,(image,target) in enumerate(train_loader,start=1):
 
-            local_batch_loss = torch.tensor(0.0,device=device)
-            local_batch_samples = torch.tensor(0,device=device)
-            image,target = image.to(device,non_blocking=True),target.to(device,non_blocking=True).to(torch.float32)
-
+            image = image.to(device,non_blocking=True)
+            target = target.to(device,non_blocking=True).to(torch.float32)
 
             output = ddp_model(image)       #forward pass
             loss = sigmoid_focal_loss(output,target,
@@ -105,22 +103,19 @@ def train_model(cfg: DictConfig, device:torch.device):
 
             metric.update(output,target)
 
-            local_batch_loss += loss.detach()*image.size(0)
-            local_batch_samples += image.size(0)
-
-            dist.all_reduce(local_batch_loss,op=dist.ReduceOp.SUM)
-            dist.all_reduce(local_batch_samples,op=dist.ReduceOp.SUM)
-
-            global_running_loss += local_batch_loss
-            global_total_samples += local_batch_samples
+            local_loss += loss.detach()*image.size(0)
+            local_samples += image.size(0)
 
 
             if is_main():
                 pbar.update(2)
-                pbar.set_postfix_str(f"loss:{(global_running_loss/global_total_samples).item():.4f}")
+
+        dist.all_reduce(local_loss,op=dist.ReduceOp.SUM)
+        dist.all_reduce(local_samples,op=dist.ReduceOp.SUM)
 
         f1 = metric.compute().item()
-        global_loss = (global_running_loss/global_total_samples).item()
+        global_loss = (local_loss/local_samples).item()
+        
         if is_main():
             wandb.log({
                 "train/loss":global_loss,
