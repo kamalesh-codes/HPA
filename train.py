@@ -39,9 +39,15 @@ def train_model(cfg: DictConfig, device:torch.device):
     ddp_model = DDP(model,device_ids=[device.index])
 
     #optimizer & metric definition
-    optimizer = torch.optim.Adam(ddp_model.parameters(),
+    optimizer = torch.optim.AdamW(ddp_model.parameters(),
                                 lr=cfg.train.lr,
                                 weight_decay=1e-4)
+    
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer,
+                T_max=cfg.train.epochs,      
+                eta_min=1e-6
+                )
     metric = MultilabelF1Score(num_labels=cfg.data.num_class,
                                 average="macro",
                                 multidim_average="global")
@@ -51,6 +57,7 @@ def train_model(cfg: DictConfig, device:torch.device):
 
     if cfg.train.run_from_checkpoint:
         optimizer.load_state_dict(obj["optimizer"])
+        scheduler.load_state_dict(obj["scheduler"])
         starting_epoch = obj["epoch"]+1
 
 
@@ -115,7 +122,9 @@ def train_model(cfg: DictConfig, device:torch.device):
 
         f1 = metric.compute().item()
         global_loss = (local_loss/local_samples).item()
-        
+
+        scheduler.step()
+
         if is_main():
             wandb.log({
                 "train/loss":global_loss,
@@ -126,6 +135,7 @@ def train_model(cfg: DictConfig, device:torch.device):
 
             obj = {"model":ddp_model.state_dict(),
                 "optimizer":optimizer.state_dict(),
+                "scheduler":scheduler.state_dict(),
                 "epoch":epoch,
                 "loss":global_loss,
                 "run_id":run.id}
