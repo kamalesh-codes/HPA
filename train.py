@@ -25,7 +25,6 @@ def train_model(cfg: DictConfig, device:torch.device):
     
     #Model creation
     model = get_model(cfg).to(device)
-    model = torch.compile(model)
 
     if cfg.train.run_from_checkpoint and is_main():
         print("Resuming from checkpoint..")
